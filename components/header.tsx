@@ -96,11 +96,33 @@ function Header({ children, className }: HeaderProps): React.ReactElement {
         >
           <>
             <div>
-              <ButtonCustom>Sign Up</ButtonCustom>
+              <ButtonCustom
+                onClick={() => {}}
+                className='
+                bg-transparent
+                font-medium
+                text-neutral-300
+               '
+              >
+                Sign Up
+              </ButtonCustom>
+            </div>
+            <div>
+              <ButtonCustom
+                onClick={() => {}}
+                className='
+                bg-white
+                px-6
+                py-2
+               '
+              >
+                Log In
+              </ButtonCustom>
             </div>
           </>
         </div>
       </div>
+      {children}
     </div>
   )
 }
