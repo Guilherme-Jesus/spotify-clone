@@ -1,29 +1,52 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-import React from 'react'
 import { twMerge } from 'tailwind-merge'
 import { RxCaretLeft, RxCaretRight } from 'react-icons/rx'
+import { useRouter } from 'next/navigation'
+import { FaUserAlt } from 'react-icons/fa'
+import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { toast } from 'react-hot-toast'
 import { HiHome } from 'react-icons/hi'
 import { BiSearch } from 'react-icons/bi'
+
+import useAuthModal from '@/hooks/useAuthModal'
+import { useUser } from '@/hooks/useUser'
 import ButtonCustom from './button-custom'
+import IfElse from '@/operators/if-else'
+// import usePlayer from '@/hooks/usePlayer'
+
+// import Button from './Button'
 
 interface HeaderProps {
   children: React.ReactNode
   className?: string
 }
 
-function Header({ children, className }: HeaderProps): React.ReactElement {
+const Header: React.FC<HeaderProps> = ({ children, className }) => {
   const router = useRouter()
+  const authModal = useAuthModal()
 
-  const handleLogout = () => {}
+  const supabaseClient = useSupabaseClient()
+  const { user } = useUser()
+
+  const handleLogout = async (): Promise<void> => {
+    const { error } = await supabaseClient.auth.signOut()
+    router.refresh()
+
+    if (error) {
+      toast.error(error.message)
+    }
+  }
+
   return (
     <div
       className={twMerge(
-        `h-fit
-        bg-gradient-to-b
-      from-emerald-800
-        p-6`,
+        `
+        h-fit 
+        bg-gradient-to-b 
+        from-emerald-800 
+        p-6
+        `,
         className
       )}
     >
@@ -32,94 +55,111 @@ function Header({ children, className }: HeaderProps): React.ReactElement {
           <button
             onClick={(): void => router.back()}
             className='
-            flex
-            cursor-pointer 
-            items-center 
-            justify-center 
-            rounded-full 
-            bg-black 
-            transition 
-            hover:opacity-75'
+              flex 
+              cursor-pointer 
+              items-center 
+              justify-center 
+              rounded-full 
+              bg-black 
+              transition 
+              hover:opacity-75
+            '
           >
-            <RxCaretLeft size={35} className='text-white' />
+            <RxCaretLeft className='text-white' size={35} />
           </button>
           <button
             onClick={(): void => router.forward()}
-            className='flex cursor-pointer items-center justify-center rounded-full bg-black transition hover:opacity-75'
+            className='
+              flex 
+              cursor-pointer 
+              items-center 
+              justify-center 
+              rounded-full 
+              bg-black 
+              transition 
+              hover:opacity-75
+            '
           >
-            <RxCaretRight size={35} className='text-white' />
+            <RxCaretRight className='text-white' size={35} />
           </button>
         </div>
         <div className='flex items-center gap-x-2 md:hidden'>
           <button
+            onClick={(): void => router.push('/')}
             className='
-             hover-opacity-75
-             items-center
-             justify-center
-             rounded-full
-             bg-white
-             p-2
-             transition
+              flex 
+              cursor-pointer 
+              items-center 
+              justify-center 
+              rounded-full 
+              bg-white 
+              p-2 
+              transition 
+              hover:opacity-75
             '
           >
-            <HiHome
-              size={20}
-              className='text-black'
-              onClick={(): void => router.push('/')}
-            />
+            <HiHome className='text-black' size={20} />
           </button>
           <button
+            onClick={(): void => router.push('/search')}
             className='
-             hover-opacity-75
-             items-center
-             justify-center
-             rounded-full
-             bg-white
-             p-2
-             transition
+              flex 
+              cursor-pointer 
+              items-center 
+              justify-center 
+              rounded-full 
+              bg-white 
+              p-2 
+              transition 
+              hover:opacity-75
             '
           >
-            <BiSearch
-              size={20}
-              className='text-black'
-              onClick={(): void => router.push('/search')}
-            />
+            <BiSearch className='text-black' size={20} />
           </button>
         </div>
-        <div
-          className='
-            flex
-            items-center
-            justify-between
-            gap-x-4
-            '
-        >
-          <>
-            <div>
+        <div className='flex items-center justify-between gap-x-4'>
+          <IfElse
+            condition={user !== null}
+            elseChildren={
+              <>
+                <div>
+                  <ButtonCustom
+                    onClick={authModal.onOpen}
+                    className='
+                    bg-transparent 
+                    font-medium 
+                    text-neutral-300
+                  '
+                  >
+                    Sign up
+                  </ButtonCustom>
+                </div>
+                <div>
+                  <ButtonCustom
+                    onClick={authModal.onOpen}
+                    className='bg-white px-6 py-2'
+                  >
+                    Log in
+                  </ButtonCustom>
+                </div>
+              </>
+            }
+          >
+            <div className='flex items-center gap-x-4'>
               <ButtonCustom
-                onClick={() => {}}
-                className='
-                bg-transparent
-                font-medium
-                text-neutral-300
-               '
+                onClick={handleLogout}
+                className='bg-white px-6 py-2'
               >
-                Sign Up
+                Logout
+              </ButtonCustom>
+              <ButtonCustom
+                onClick={(): void => router.push('/account')}
+                className='bg-white'
+              >
+                <FaUserAlt />
               </ButtonCustom>
             </div>
-            <div>
-              <ButtonCustom
-                onClick={() => {}}
-                className='
-                bg-white
-                px-6
-                py-2
-               '
-              >
-                Log In
-              </ButtonCustom>
-            </div>
-          </>
+          </IfElse>
         </div>
       </div>
       {children}
